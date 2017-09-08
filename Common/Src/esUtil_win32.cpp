@@ -22,7 +22,8 @@ LRESULT WINAPI ESWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (esContext && esContext->drawFunc)
 			esContext->drawFunc(esContext);
 
-		ValidateRect(esContext->hWnd, NULL);
+		//ValidateRect(esContext->hWnd, NULL);
+		ValidateRect(esContext->eglNativeWindow, NULL);
 	}
 	break;
 
@@ -85,7 +86,7 @@ GLboolean WinCreate(ESContext *esContext, const char *title)
 
 
 
-	esContext->hWnd = CreateWindow(
+	esContext->eglNativeWindow = CreateWindow(
 		"opengles2.0",
 		title,
 		wStyle,
@@ -100,13 +101,13 @@ GLboolean WinCreate(ESContext *esContext, const char *title)
 
 	// Set the ESContext* to the GWL_USERDATA so that it is available to the 
 	// ESWindowProc
-	SetWindowLongPtr(esContext->hWnd, GWL_USERDATA, (LONG)(LONG_PTR)esContext);
+	SetWindowLongPtr(esContext->eglNativeWindow, GWL_USERDATA, (LONG)(LONG_PTR)esContext);
 
 
-	if (esContext->hWnd == NULL)
+	if (esContext->eglNativeWindow == NULL)
 		return GL_FALSE;
 
-	ShowWindow(esContext->hWnd, TRUE);
+	ShowWindow(esContext->eglNativeWindow, TRUE);
 
 	return GL_TRUE;
 }
@@ -138,10 +139,36 @@ void WinLoop(ESContext *esContext)
 			}
 		}
 		else
-			SendMessage(esContext->hWnd, WM_PAINT, 0, 0);
+			SendMessage(esContext->eglNativeWindow, WM_PAINT, 0, 0);
 
 		// Call update function if registered
 		if (esContext->updateFunc != NULL)
 			esContext->updateFunc(esContext, deltaTime);
 	}
+}
+
+extern int esMain(ESContext* esContext);
+
+int main(int argc, char* argv[])
+{
+	ESContext esContext;
+	memset(&esContext, 0, sizeof(ESContext));
+
+	if (esMain(&esContext) != GL_TRUE)
+	{
+		return 1;
+	}
+
+	WinLoop(&esContext);
+
+	if (NULL != esContext.shutdownFunc)
+	{
+		esContext.shutdownFunc(&esContext);
+	}
+
+	if (NULL != esContext.userData)
+	{
+		free(esContext.userData);
+	}
+	return 0;
 }

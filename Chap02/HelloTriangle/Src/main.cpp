@@ -1,4 +1,4 @@
-#include <stdlib.h>
+//#include <stdlib.h>
 #include "esUtil.h"
 
 typedef struct
@@ -127,10 +127,9 @@ int Init(ESContext *esContext)
 
 
 //void Draw(ESContext *esContext)
-void Draw(void *draw)
+void Draw(ESContext *esContext)
 {
-	ESContext* esContext = (ESContext*)draw;
-	UserData *userData = (UserData *)esContext->userData;
+	UserData *userData = (UserData*)esContext->userData;
 	GLfloat vVertices[] = { 0.0f,  0.5f, 0.0f,
 		-0.5f, -0.5f, 0.0f,
 		0.5f, -0.5f, 0.0f };
@@ -154,24 +153,26 @@ void Draw(void *draw)
 }
 
 
-int main(int argc, char *argv[])
+//int esMain(int argc, char *argv[])
+int esMain(ESContext *esContext)
 {
-	ESContext esContext;
-	UserData  userData;
+//	ESContext esContext;
+//	UserData  userData;
 
-	esInitContext(&esContext);
-	esContext.userData = &userData;
+	//esInitContext(&esContext);
+//	esContext.userData = &userData;
 
-	esCreateWindow(&esContext, "Hello Triangle", 320, 240, ES_WINDOW_RGB);
+	esContext->userData = malloc(sizeof(UserData));
+	esCreateWindow(esContext, "Hello Triangle", 320, 240, ES_WINDOW_RGB);
 
-	if (!Init(&esContext))
+	if (!Init(esContext))
 	{
 		return 0;
 	}
 
-	esRegisterDrawFunc(&esContext, Draw);
+	esRegisterDrawFunc(esContext, Draw);
 
-	esMainLoop(&esContext);
+	//esMainLoop(&esContext);
 
-	return 0;
+	return GL_TRUE;
 }

@@ -1,9 +1,11 @@
 #define WIN32_LEAN_AND_MEAN
 #include "esUtil.h"
 #include "esUtil_win.h"
-#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef _WIN32_
+#include <windows.h>
+#endif
 
 
 #define INVERTED_BIT            (1 << 5)
@@ -38,7 +40,7 @@ int WinTGALoad(const char *fileName, char **buffer, int *width, int *height)
 {
 	FILE        *fp;
 	TGA_HEADER   Header;
-
+	/*
 	if (fopen_s(&fp, fileName, "rb") != 0)
 	{
 		return FALSE;
@@ -90,6 +92,6 @@ int WinTGALoad(const char *fileName, char **buffer, int *width, int *height)
 			return(TRUE);
 		}
 	}
-
+	*/
 	return(FALSE);
 }
