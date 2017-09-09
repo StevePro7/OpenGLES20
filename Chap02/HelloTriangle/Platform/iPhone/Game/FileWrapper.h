@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 
 //
-// Book:      OpenGL(R) ES 3.0 Programming Guide, 2nd Edition
+// Book:      OpenGL(R) ES 2.0 Programming Guide, 2nd Edition
 // Authors:   Dan Ginsburg, Budirijanto Purnomo, Dave Shreiner, Aaftab Munshi
 // ISBN-10:   0-321-93388-5
 // ISBN-13:   978-0-321-93388-1
