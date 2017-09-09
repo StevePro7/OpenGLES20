@@ -18,6 +18,13 @@
 		8084A1891F64205E00B732A0 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8084A1881F64205E00B732A0 /* UIKit.framework */; };
 		8084A18B1F64206500B732A0 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8084A18A1F64206500B732A0 /* CoreGraphics.framework */; };
 		8084A18D1F64206C00B732A0 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8084A18C1F64206C00B732A0 /* OpenGLES.framework */; };
+		8084A1941F64216500B732A0 /* esShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8084A18F1F64216500B732A0 /* esShader.cpp */; };
+		8084A1951F64216500B732A0 /* esShapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8084A1901F64216500B732A0 /* esShapes.cpp */; };
+		8084A1961F64216500B732A0 /* esTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8084A1911F64216500B732A0 /* esTransform.cpp */; };
+		8084A1971F64216500B732A0 /* esUtil_TGA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8084A1921F64216500B732A0 /* esUtil_TGA.cpp */; };
+		8084A1981F64216500B732A0 /* esUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8084A1931F64216500B732A0 /* esUtil.cpp */; };
+		8084A19B1F64228000B732A0 /* FileWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8084A19A1F64228000B732A0 /* FileWrapper.mm */; };
+		8084A19D1F6423C700B732A0 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8084A19C1F6423C700B732A0 /* main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +43,15 @@
 		8084A1881F64205E00B732A0 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		8084A18A1F64206500B732A0 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		8084A18C1F64206C00B732A0 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		8084A18E1F64213A00B732A0 /* esUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = esUtil.h; path = ../../../../Common/Inc/esUtil.h; sourceTree = "<group>"; };
+		8084A18F1F64216500B732A0 /* esShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = esShader.cpp; path = ../../../../Common/Src/esShader.cpp; sourceTree = "<group>"; };
+		8084A1901F64216500B732A0 /* esShapes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = esShapes.cpp; path = ../../../../Common/Src/esShapes.cpp; sourceTree = "<group>"; };
+		8084A1911F64216500B732A0 /* esTransform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = esTransform.cpp; path = ../../../../Common/Src/esTransform.cpp; sourceTree = "<group>"; };
+		8084A1921F64216500B732A0 /* esUtil_TGA.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = esUtil_TGA.cpp; path = ../../../../Common/Src/esUtil_TGA.cpp; sourceTree = "<group>"; };
+		8084A1931F64216500B732A0 /* esUtil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = esUtil.cpp; path = ../../../../Common/Src/esUtil.cpp; sourceTree = "<group>"; };
+		8084A1991F64228000B732A0 /* FileWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileWrapper.h; sourceTree = "<group>"; };
+		8084A19A1F64228000B732A0 /* FileWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FileWrapper.mm; sourceTree = "<group>"; };
+		8084A19C1F6423C700B732A0 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../../Src/main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,8 +73,8 @@
 		8084A1561F641EB100B732A0 = {
 			isa = PBXGroup;
 			children = (
-				8084A17A1F641F1300B732A0 /* Source Files */,
 				8084A1791F641F0700B732A0 /* Header Files */,
+				8084A17A1F641F1300B732A0 /* Source Files */,
 				8084A1611F641EB100B732A0 /* Game */,
 				8084A1601F641EB100B732A0 /* Products */,
 				8084A1831F64204F00B732A0 /* Frameworks */,
@@ -78,6 +94,8 @@
 			children = (
 				8084A1651F641EB100B732A0 /* AppDelegate.h */,
 				8084A1661F641EB100B732A0 /* AppDelegate.m */,
+				8084A1991F64228000B732A0 /* FileWrapper.h */,
+				8084A19A1F64228000B732A0 /* FileWrapper.mm */,
 				8084A1681F641EB100B732A0 /* ViewController.h */,
 				8084A17B1F641F7400B732A0 /* ViewController.mm */,
 				8084A17F1F641FA600B732A0 /* Main_iPhone.storyboard */,
@@ -100,6 +118,7 @@
 		8084A1791F641F0700B732A0 /* Header Files */ = {
 			isa = PBXGroup;
 			children = (
+				8084A18E1F64213A00B732A0 /* esUtil.h */,
 			);
 			name = "Header Files";
 			sourceTree = "<group>";
@@ -107,6 +126,12 @@
 		8084A17A1F641F1300B732A0 /* Source Files */ = {
 			isa = PBXGroup;
 			children = (
+				8084A18F1F64216500B732A0 /* esShader.cpp */,
+				8084A1901F64216500B732A0 /* esShapes.cpp */,
+				8084A1911F64216500B732A0 /* esTransform.cpp */,
+				8084A1921F64216500B732A0 /* esUtil_TGA.cpp */,
+				8084A1931F64216500B732A0 /* esUtil.cpp */,
+				8084A19C1F6423C700B732A0 /* main.cpp */,
 			);
 			name = "Source Files";
 			sourceTree = "<group>";
@@ -195,9 +220,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8084A1941F64216500B732A0 /* esShader.cpp in Sources */,
+				8084A1981F64216500B732A0 /* esUtil.cpp in Sources */,
 				8084A17C1F641F7400B732A0 /* ViewController.mm in Sources */,
+				8084A1961F64216500B732A0 /* esTransform.cpp in Sources */,
+				8084A19B1F64228000B732A0 /* FileWrapper.mm in Sources */,
 				8084A1671F641EB100B732A0 /* AppDelegate.m in Sources */,
+				8084A1971F64216500B732A0 /* esUtil_TGA.cpp in Sources */,
 				8084A1641F641EB100B732A0 /* main.m in Sources */,
+				8084A19D1F6423C700B732A0 /* main.cpp in Sources */,
+				8084A1951F64216500B732A0 /* esShapes.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

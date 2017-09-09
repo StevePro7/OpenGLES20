@@ -1,9 +1,9 @@
 #define WIN32_LEAN_AND_MEAN
 #include "esUtil.h"
-#include "esUtil_win.h"
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef _WIN32_
+#include "esUtil_win.h"
 #include <windows.h>
 #endif
 
@@ -38,8 +38,8 @@ typedef struct
 
 int WinTGALoad(const char *fileName, char **buffer, int *width, int *height)
 {
-	FILE        *fp;
-	TGA_HEADER   Header;
+	//FILE        *fp;
+	//TGA_HEADER   Header;
 	/*
 	if (fopen_s(&fp, fileName, "rb") != 0)
 	{

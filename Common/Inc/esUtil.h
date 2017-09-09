@@ -44,7 +44,7 @@
 #include <stdlib.h>
 
 #ifdef __APPLE__
-#include <OpenGLES/ES2esUtil.h/gl.h>
+#include <OpenGLES/ES2/gl.h>
 #else
 #include <GLES2/gl2.h>
 #include <EGL/egl.h>
