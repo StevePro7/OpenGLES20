@@ -2,3 +2,5 @@
 *.suo
 *.vcxproj.*.user
 *.xcuserstate
+*.vs*
+*Obj*
