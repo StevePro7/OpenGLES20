@@ -1,6 +1,7 @@
 #include "esUtil.h"
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define ES_PI  (3.14159265f)
 

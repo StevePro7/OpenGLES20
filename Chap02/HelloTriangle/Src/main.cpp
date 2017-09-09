@@ -149,7 +149,7 @@ void Draw(ESContext *esContext)
 
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 
-	eglSwapBuffers(esContext->eglDisplay, esContext->eglSurface);
+//sgb	eglSwapBuffers(esContext->eglDisplay, esContext->eglSurface);
 }
 
 
