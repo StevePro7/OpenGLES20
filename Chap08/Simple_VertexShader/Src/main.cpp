@@ -193,6 +193,6 @@ int esMain( ESContext *esContext )
 
     //esMainLoop( &esContext );
 
-    return GL_TRUE; 
     //ShutDown( esContext );
+    return GL_TRUE;
 }
