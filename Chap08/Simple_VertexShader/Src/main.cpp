@@ -1,176 +1,198 @@
+//
+// Book:      OpenGL(R) ES 2.0 Programming Guide
+// Authors:   Aaftab Munshi, Dan Ginsburg, Dave Shreiner
+// ISBN-10:   0321502795
+// ISBN-13:   9780321502797
+// Publisher: Addison-Wesley Professional
+// URLs:      http://safari.informit.com/9780321563835
+//            http://www.opengles-book.com
+//
+
+// Simple_VertexShader.c
+//
+//    This is a simple example that draws a rotating cube in perspective
+//    using a vertex shader to transform the object
+//
+#include <stdlib.h>
 #include "esUtil.h"
-//#include <stdlib.h>
 
 typedef struct
 {
-	// Handle to a program object
-	GLuint programObject;
+    // Handle to a program object
+    GLuint programObject;
 
+    // Attribute locations
+    GLint  positionLoc;
+
+    // Uniform locations
+    GLint  mvpLoc;
+
+    // Vertex daata
+    GLfloat  *vertices;
+    GLuint   *indices;
+    int       numIndices;
+
+    // Rotation angle
+    GLfloat   angle;
+
+    // MVP matrix
+    ESMatrix  mvpMatrix;
 } UserData;
 
-
-GLuint LoadShader(GLenum type, const char *shaderSrc)
+///
+// Initialize the shader and program object
+//
+int Init( ESContext *esContext )
 {
-	GLuint shader;
-	GLint compiled;
+    UserData *userData = (UserData *)esContext->userData;
+    GLbyte vShaderStr[] =
+        "uniform mat4 u_mvpMatrix;                   \n"
+        "attribute vec4 a_position;                  \n"
+        "void main()                                 \n"
+        "{                                           \n"
+        "   gl_Position = u_mvpMatrix * a_position;  \n"
+        "}                                           \n";
 
-	// Create the shader object
-	shader = glCreateShader(type);
+    GLbyte fShaderStr[] =
+        "precision mediump float;                            \n"
+        "void main()                                         \n"
+        "{                                                   \n"
+        "  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );        \n"
+        "}                                                   \n";
 
-	if (shader == 0)
-		return 0;
+    // Load the shaders and get a linked program object
+    userData->programObject = esLoadProgram( (const char *)vShaderStr, (const char *)fShaderStr );
 
-	// Load the shader source
-	glShaderSource(shader, 1, &shaderSrc, NULL);
+    // Get the attribute locations
+    userData->positionLoc = glGetAttribLocation( userData->programObject, "a_position" );
 
-	// Compile the shader
-	glCompileShader(shader);
+    // Get the uniform locations
+    userData->mvpLoc = glGetUniformLocation( userData->programObject, "u_mvpMatrix" );
 
-	// Check the compile status
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    // Generate the vertex data
+    userData->numIndices = esGenCube( 1.0, &userData->vertices,
+        NULL, NULL, &userData->indices );
 
-	if (!compiled)
-	{
-		GLint infoLen = 0;
+    // Starting rotation angle for the cube
+    userData->angle = 45.0f;
 
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
-
-		if (infoLen > 1)
-		{
-			char* infoLog = (char *)malloc(sizeof(char) * infoLen);
-
-			glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
-			esLogMessage("Error compiling shader:\n%s\n", infoLog);
-
-			free(infoLog);
-		}
-
-		glDeleteShader(shader);
-		return 0;
-	}
-
-	return shader;
-
+    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+    return TRUE;
 }
 
 
-int Init(ESContext *esContext)
+///
+// Update MVP matrix based on time
+//
+void Update( ESContext *esContext, float deltaTime )
 {
-	UserData *userData = (UserData *)esContext->userData;
-	GLbyte vShaderStr[] =
-		"attribute vec4 vPosition;    \n"
-		"void main()                  \n"
-		"{                            \n"
-		"   gl_Position = vPosition;  \n"
-		"}                            \n";
+    UserData *userData = (UserData*)esContext->userData;
+    ESMatrix perspective;
+    ESMatrix modelview;
+    float    aspect;
 
-	GLbyte fShaderStr[] =
-		"precision mediump float;\n"\
-		"void main()                                  \n"
-		"{                                            \n"
-		"  gl_FragColor = vec4 ( 1.0, 0.0, 0.0, 1.0 );\n"
-		"}                                            \n";
+    // Compute a rotation angle based on time to rotate the cube
+    userData->angle += (deltaTime * 40.0f);
+    if( userData->angle >= 360.0f )
+        userData->angle -= 360.0f;
 
-	GLuint vertexShader;
-	GLuint fragmentShader;
-	GLuint programObject;
-	GLint linked;
+    // Compute the window aspect ratio
+    aspect = (GLfloat)esContext->width / (GLfloat)esContext->height;
 
-	// Load the vertex/fragment shaders
-	vertexShader = LoadShader(GL_VERTEX_SHADER, (const char *)vShaderStr);
-	fragmentShader = LoadShader(GL_FRAGMENT_SHADER, (const char *)fShaderStr);
+    // Generate a perspective matrix with a 60 degree FOV
+    esMatrixLoadIdentity( &perspective );
+    esPerspective( &perspective, 60.0f, aspect, 1.0f, 20.0f );
 
-	// Create the program object
-	programObject = glCreateProgram();
+    // Generate a model view matrix to rotate/translate the cube
+    esMatrixLoadIdentity( &modelview );
 
-	if (programObject == 0)
-		return 0;
+    // Translate away from the viewer
+    esTranslate( &modelview, 0.0, 0.0, -2.0 );
 
-	glAttachShader(programObject, vertexShader);
-	glAttachShader(programObject, fragmentShader);
+    // Rotate the cube
+    esRotate( &modelview, userData->angle, 1.0, 0.0, 1.0 );
 
-	// Bind vPosition to attribute 0   
-	glBindAttribLocation(programObject, 0, "vPosition");
+    // Compute the final MVP by multiplying the 
+    // modevleiw and perspective matrices together
+    esMatrixMultiply( &userData->mvpMatrix, &modelview, &perspective );
+}
 
-	// Link the program
-	glLinkProgram(programObject);
+///
+// Draw a triangle using the shader pair created in Init()
+//
+void Draw( ESContext *esContext )
+{
+    UserData *userData = (UserData *)esContext->userData;
 
-	// Check the link status
-	glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
+    // Set the viewport
+    glViewport( 0, 0, esContext->width, esContext->height );
 
-	if (!linked)
-	{
-		GLint infoLen = 0;
 
-		glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
+    // Clear the color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
 
-		if (infoLen > 1)
-		{
-			char* infoLog = (char *)malloc(sizeof(char) * infoLen);
+    // Use the program object
+    glUseProgram( userData->programObject );
 
-			glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
-			esLogMessage("Error linking program:\n%s\n", infoLog);
+    // Load the vertex position
+    glVertexAttribPointer( userData->positionLoc, 3, GL_FLOAT,
+        GL_FALSE, 3 * sizeof( GLfloat ), userData->vertices );
 
-			free(infoLog);
-		}
+    glEnableVertexAttribArray( userData->positionLoc );
 
-		glDeleteProgram(programObject);
-		return FALSE;
-	}
 
-	// Store the program object
-	userData->programObject = programObject;
+    // Load the MVP matrix
+    glUniformMatrix4fv( userData->mvpLoc, 1, GL_FALSE, (GLfloat*)&userData->mvpMatrix.m[0][0] );
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	return TRUE;
+    // Draw the cube
+    glDrawElements( GL_TRIANGLES, userData->numIndices, GL_UNSIGNED_INT, userData->indices );
+
+    eglSwapBuffers( esContext->eglDisplay, esContext->eglSurface );
+}
+
+///
+// Cleanup
+//
+void ShutDown( ESContext *esContext )
+{
+    UserData *userData = (UserData *)esContext->userData;
+
+    if( userData->vertices != NULL )
+    {
+        free( userData->vertices );
+    }
+
+    if( userData->indices != NULL )
+    {
+        free( userData->indices );
+    }
+
+    // Delete program object
+    glDeleteProgram( userData->programObject );
 }
 
 
-//void Draw(ESContext *esContext)
-void Draw(ESContext *esContext)
+//int main( int argc, char *argv[] )
+int esMain( ESContext *esContext )
 {
-	UserData *userData = (UserData*)esContext->userData;
-	GLfloat vVertices[] = { 0.0f,  0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f };
+    //ESContext esContext;
+    //UserData  userData;
 
-	// Set the viewport
-	glViewport(0, 0, esContext->width, esContext->height);
+    //esInitContext( &esContext );
+    //esContext.userData = &userData;
 
-	// Clear the color buffer
-	glClear(GL_COLOR_BUFFER_BIT);
+    esContext->userData = malloc( sizeof( UserData ) );
+    esCreateWindow( esContext, "Simple Texture 2D", 320, 240, ES_WINDOW_RGB );
 
-	// Use the program object
-	glUseProgram(userData->programObject);
+    if( !Init( esContext ) )
+        return 0;
 
-	// Load the vertex data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
-	glEnableVertexAttribArray(0);
+    esRegisterDrawFunc( esContext, Draw );
+    esRegisterUpdateFunc( esContext, Update );
+    esRegisterShutdownFunc( esContext, ShutDown );
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-}
+    //esMainLoop( &esContext );
 
-
-//int esMain(int argc, char *argv[])
-int esMain(ESContext *esContext)
-{
-//	ESContext esContext;
-//	UserData  userData;
-
-	//esInitContext(&esContext);
-//	esContext.userData = &userData;
-
-	esContext->userData = malloc(sizeof(UserData));
-	esCreateWindow(esContext, "Hello Triangle", 320, 240, ES_WINDOW_RGB);
-
-	if (!Init(esContext))
-	{
-		return 0;
-	}
-
-	esRegisterDrawFunc(esContext, Draw);
-
-	//esMainLoop(&esContext);
-
-	return GL_TRUE;
+    return GL_TRUE; 
+    //ShutDown( esContext );
 }
