@@ -1,176 +1,217 @@
+//
+// Book:      OpenGL(R) ES 2.0 Programming Guide
+// Authors:   Aaftab Munshi, Dan Ginsburg, Dave Shreiner
+// ISBN-10:   0321502795
+// ISBN-13:   9780321502797
+// Publisher: Addison-Wesley Professional
+// URLs:      http://safari.informit.com/9780321563835
+//            http://www.opengles-book.com
+//
+
+// MultiTexture.c
+//
+//    This is an example that draws a quad with a basemap and
+//    lightmap to demonstrate multitexturing.
+//
+#include <stdlib.h>
 #include "esUtil.h"
-//#include <stdlib.h>
 
 typedef struct
 {
-	// Handle to a program object
-	GLuint programObject;
+    // Handle to a program object
+    GLuint programObject;
+
+    // Attribute locations
+    GLint  positionLoc;
+    GLint  texCoordLoc;
+
+    // Sampler locations
+    GLint baseMapLoc;
+    GLint lightMapLoc;
+
+    // Texture handle
+    GLuint baseMapTexId;
+    GLuint lightMapTexId;
 
 } UserData;
 
 
-GLuint LoadShader(GLenum type, const char *shaderSrc)
+///
+// Load texture from disk
+//
+GLuint LoadTexture( void *ioContext, char *fileName )
 {
-	GLuint shader;
-	GLint compiled;
+    int width,
+        height;
+    char *buffer = esLoadTGA( ioContext, fileName, &width, &height );
+    GLuint texId;
 
-	// Create the shader object
-	shader = glCreateShader(type);
+    if( buffer == NULL )
+    {
+        esLogMessage( "Error loading (%s) image.\n", fileName );
+        return 0;
+    }
 
-	if (shader == 0)
-		return 0;
+    glGenTextures( 1, &texId );
+    glBindTexture( GL_TEXTURE_2D, texId );
 
-	// Load the shader source
-	glShaderSource(shader, 1, &shaderSrc, NULL);
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
-	// Compile the shader
-	glCompileShader(shader);
+    free( buffer );
 
-	// Check the compile status
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-
-	if (!compiled)
-	{
-		GLint infoLen = 0;
-
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
-
-		if (infoLen > 1)
-		{
-			char* infoLog = (char *)malloc(sizeof(char) * infoLen);
-
-			glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
-			esLogMessage("Error compiling shader:\n%s\n", infoLog);
-
-			free(infoLog);
-		}
-
-		glDeleteShader(shader);
-		return 0;
-	}
-
-	return shader;
-
+    return texId;
 }
 
 
-int Init(ESContext *esContext)
+
+///
+// Initialize the shader and program object
+//
+int Init( ESContext *esContext )
 {
-	UserData *userData = (UserData *)esContext->userData;
-	GLbyte vShaderStr[] =
-		"attribute vec4 vPosition;    \n"
-		"void main()                  \n"
-		"{                            \n"
-		"   gl_Position = vPosition;  \n"
-		"}                            \n";
+    UserData *userData = (UserData *)esContext->userData;
+    GLbyte vShaderStr[] =
+        "attribute vec4 a_position;   \n"
+        "attribute vec2 a_texCoord;   \n"
+        "varying vec2 v_texCoord;     \n"
+        "void main()                  \n"
+        "{                            \n"
+        "   gl_Position = a_position; \n"
+        "   v_texCoord = a_texCoord;  \n"
+        "}                            \n";
 
-	GLbyte fShaderStr[] =
-		"precision mediump float;\n"\
-		"void main()                                  \n"
-		"{                                            \n"
-		"  gl_FragColor = vec4 ( 1.0, 0.0, 0.0, 1.0 );\n"
-		"}                                            \n";
+    GLbyte fShaderStr[] =
+        "precision mediump float;                            \n"
+        "varying vec2 v_texCoord;                            \n"
+        "uniform sampler2D s_baseMap;                        \n"
+        "uniform sampler2D s_lightMap;                       \n"
+        "void main()                                         \n"
+        "{                                                   \n"
+        "  vec4 baseColor;                                   \n"
+        "  vec4 lightColor;                                  \n"
+        "                                                    \n"
+        "  baseColor = texture2D( s_baseMap, v_texCoord );   \n"
+        "  lightColor = texture2D( s_lightMap, v_texCoord ); \n"
+        "  gl_FragColor = baseColor * (lightColor + 0.25);   \n"
+        "}                                                   \n";
 
-	GLuint vertexShader;
-	GLuint fragmentShader;
-	GLuint programObject;
-	GLint linked;
+    // Load the shaders and get a linked program object
+    userData->programObject = esLoadProgram( (const char* )vShaderStr, (const char* )fShaderStr );
 
-	// Load the vertex/fragment shaders
-	vertexShader = LoadShader(GL_VERTEX_SHADER, (const char *)vShaderStr);
-	fragmentShader = LoadShader(GL_FRAGMENT_SHADER, (const char *)fShaderStr);
+    // Get the attribute locations
+    userData->positionLoc = glGetAttribLocation( userData->programObject, "a_position" );
+    userData->texCoordLoc = glGetAttribLocation( userData->programObject, "a_texCoord" );
 
-	// Create the program object
-	programObject = glCreateProgram();
+    // Get the sampler location
+    userData->baseMapLoc = glGetUniformLocation( userData->programObject, "s_baseMap" );
+    userData->lightMapLoc = glGetUniformLocation( userData->programObject, "s_lightMap" );
 
-	if (programObject == 0)
-		return 0;
+    // Load the textures
+    userData->baseMapTexId = LoadTexture( esContext->platformData, "basemap.tga" );
+    userData->lightMapTexId = LoadTexture( esContext->platformData, "lightmap.tga" );
 
-	glAttachShader(programObject, vertexShader);
-	glAttachShader(programObject, fragmentShader);
+    if( userData->baseMapTexId == 0 || userData->lightMapTexId == 0 )
+        return FALSE;
 
-	// Bind vPosition to attribute 0   
-	glBindAttribLocation(programObject, 0, "vPosition");
+    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+    return TRUE;
+}
 
-	// Link the program
-	glLinkProgram(programObject);
+///
+// Draw a triangle using the shader pair created in Init()
+//
+void Draw( ESContext *esContext )
+{
+    UserData *userData = (UserData *)esContext->userData;
+    GLfloat vVertices[] = { -0.5f, 0.5f, 0.0f,  // Position 0
+        0.0f, 0.0f,        // TexCoord 0 
+        -0.5f, -0.5f, 0.0f,  // Position 1
+        0.0f, 1.0f,        // TexCoord 1
+        0.5f, -0.5f, 0.0f,  // Position 2
+        1.0f, 1.0f,        // TexCoord 2
+        0.5f, 0.5f, 0.0f,  // Position 3
+        1.0f, 0.0f         // TexCoord 3
+    };
+    GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
 
-	// Check the link status
-	glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
+    // Set the viewport
+    glViewport( 0, 0, esContext->width, esContext->height );
 
-	if (!linked)
-	{
-		GLint infoLen = 0;
+    // Clear the color buffer
+    glClear( GL_COLOR_BUFFER_BIT );
 
-		glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
+    // Use the program object
+    glUseProgram( userData->programObject );
 
-		if (infoLen > 1)
-		{
-			char* infoLog = (char *)malloc(sizeof(char) * infoLen);
+    // Load the vertex position
+    glVertexAttribPointer( userData->positionLoc, 3, GL_FLOAT,
+        GL_FALSE, 5 * sizeof( GLfloat ), vVertices );
+    // Load the texture coordinate
+    glVertexAttribPointer( userData->texCoordLoc, 2, GL_FLOAT,
+        GL_FALSE, 5 * sizeof( GLfloat ), &vVertices[3] );
 
-			glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
-			esLogMessage("Error linking program:\n%s\n", infoLog);
+    glEnableVertexAttribArray( userData->positionLoc );
+    glEnableVertexAttribArray( userData->texCoordLoc );
 
-			free(infoLog);
-		}
+    // Bind the base map
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture( GL_TEXTURE_2D, userData->baseMapTexId );
 
-		glDeleteProgram(programObject);
-		return FALSE;
-	}
+    // Set the base map sampler to texture unit to 0
+    glUniform1i( userData->baseMapLoc, 0 );
 
-	// Store the program object
-	userData->programObject = programObject;
+    // Bind the light map
+    glActiveTexture( GL_TEXTURE1 );
+    glBindTexture( GL_TEXTURE_2D, userData->lightMapTexId );
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	return TRUE;
+    // Set the light map sampler to texture unit 1
+    glUniform1i( userData->lightMapLoc, 1 );
+
+    glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices );
+
+    eglSwapBuffers( esContext->eglDisplay, esContext->eglSurface );
+}
+
+///
+// Cleanup
+//
+void ShutDown( ESContext *esContext )
+{
+    UserData *userData = (UserData *)esContext->userData;
+
+    // Delete texture object
+    glDeleteTextures( 1, &userData->baseMapTexId );
+    glDeleteTextures( 1, &userData->lightMapTexId );
+
+    // Delete program object
+    glDeleteProgram( userData->programObject );
 }
 
 
-//void Draw(ESContext *esContext)
-void Draw(ESContext *esContext)
+//int main( int argc, char *argv[] )
+int esMain( ESContext *esContext )
 {
-	UserData *userData = (UserData*)esContext->userData;
-	GLfloat vVertices[] = { 0.0f,  0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f };
+    //ESContext esContext;
+    //UserData  userData;
 
-	// Set the viewport
-	glViewport(0, 0, esContext->width, esContext->height);
+    //esInitContext( esContext );
+    //esContext.userData = &userData;
 
-	// Clear the color buffer
-	glClear(GL_COLOR_BUFFER_BIT);
+    esContext->userData = malloc( sizeof( UserData ) );
+    esCreateWindow( esContext, "MultiTexture", 320, 240, ES_WINDOW_RGB );
 
-	// Use the program object
-	glUseProgram(userData->programObject);
+    if( !Init( esContext ) )
+        return 0;
 
-	// Load the vertex data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
-	glEnableVertexAttribArray(0);
+    esRegisterDrawFunc( esContext, Draw );
+    esRegisterShutdownFunc( esContext, ShutDown );
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-}
+    //esMainLoop( &esContext );
 
-
-//int esMain(int argc, char *argv[])
-int esMain(ESContext *esContext)
-{
-//	ESContext esContext;
-//	UserData  userData;
-
-	//esInitContext(&esContext);
-//	esContext.userData = &userData;
-
-	esContext->userData = malloc(sizeof(UserData));
-	esCreateWindow(esContext, "Hello Triangle", 320, 240, ES_WINDOW_RGB);
-
-	if (!Init(esContext))
-	{
-		return 0;
-	}
-
-	esRegisterDrawFunc(esContext, Draw);
-
-	//esMainLoop(&esContext);
-
-	return GL_TRUE;
+    //ShutDown( &esContext );
+    return GL_TRUE;
 }
