@@ -254,7 +254,7 @@ void Draw( ESContext *esContext )
 
     glDrawArrays( GL_POINTS, 0, NUM_PARTICLES );
 
-    eglSwapBuffers( esContext->eglDisplay, esContext->eglSurface );
+    //eglSwapBuffers( esContext->eglDisplay, esContext->eglSurface );
 }
 
 ///

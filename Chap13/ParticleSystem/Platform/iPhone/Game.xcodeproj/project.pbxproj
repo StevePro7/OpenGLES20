@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		805906801F9BE7E2009B5F30 /* smoke.tga in Resources */ = {isa = PBXBuildFile; fileRef = 8059067F1F9BE7E2009B5F30 /* smoke.tga */; };
 		8084A1641F641EB100B732A0 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8084A1631F641EB100B732A0 /* main.m */; };
 		8084A1671F641EB100B732A0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8084A1661F641EB100B732A0 /* AppDelegate.m */; };
 		8084A16F1F641EB100B732A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8084A16E1F641EB100B732A0 /* Assets.xcassets */; };
@@ -28,6 +29,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8059067F1F9BE7E2009B5F30 /* smoke.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = smoke.tga; path = Game/smoke.tga; sourceTree = SOURCE_ROOT; };
 		8084A15F1F641EB100B732A0 /* Game.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Game.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8084A1631F641EB100B732A0 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8084A1651F641EB100B732A0 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -70,12 +72,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8059067E1F9BE7B7009B5F30 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8059067F1F9BE7E2009B5F30 /* smoke.tga */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		8084A1561F641EB100B732A0 = {
 			isa = PBXGroup;
 			children = (
 				8084A1791F641F0700B732A0 /* Header Files */,
 				8084A17A1F641F1300B732A0 /* Source Files */,
 				8084A1611F641EB100B732A0 /* Game */,
+				8059067E1F9BE7B7009B5F30 /* Resources */,
 				8084A1601F641EB100B732A0 /* Products */,
 				8084A1831F64204F00B732A0 /* Frameworks */,
 			);
@@ -209,6 +220,7 @@
 			files = (
 				8084A16F1F641EB100B732A0 /* Assets.xcassets in Resources */,
 				8084A1811F641FA600B732A0 /* Main_iPad.storyboard in Resources */,
+				805906801F9BE7E2009B5F30 /* smoke.tga in Resources */,
 				8084A1821F641FA600B732A0 /* Main_iPhone.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
